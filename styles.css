@@ -97,6 +97,7 @@ body {
 .controls {
   display: flex;
   flex-wrap: wrap;
+  align-items: stretch;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
 }
@@ -107,6 +108,9 @@ body {
   padding: 0.75rem 1rem;
   min-width: 0;
   background: var(--control-bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .control-group legend {
@@ -119,6 +123,12 @@ body {
   gap: 1rem;
 }
 
+.tuning-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .tuning-row {
   display: flex;
   flex-wrap: wrap;
@@ -126,15 +136,33 @@ body {
   align-items: center;
 }
 
+.tuning-shift {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex-shrink: 0;
+}
+
+.tuning-shift-btn {
+  width: 3.5rem;
+  min-width: 3.5rem;
+  font-size: 0.65rem;
+  padding: 0.15rem;
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  background: var(--control-bg);
+  color: var(--fg);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.tuning-shift-btn:hover {
+  opacity: 0.9;
+}
+
 .tuning-label {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-}
-
-.tuning-string-num {
-  min-width: 1.25rem;
-  color: var(--muted);
 }
 
 .tuning-row select {
@@ -240,4 +268,30 @@ body.theme-dark .fretboard .cell.fret-0 {
 
 .scale-legend strong {
   color: var(--fg);
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.scale-legend-block {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: flex-start;
+}
+
+.scale-legend-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 2.5em;
+}
+
+.scale-legend-col .scale-legend-note {
+  display: block;
+}
+
+.scale-legend-col .scale-legend-degree {
+  font-size: 0.85em;
+  color: var(--fret-marker);
+  margin-top: 0.15rem;
 }

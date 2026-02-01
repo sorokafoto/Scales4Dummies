@@ -27,6 +27,20 @@
     'Locrian': [0, 1, 3, 5, 6, 8, 10]
   };
 
+  // Ступени тональностей: латинские цифры с бемолями/диезами
+  const DEGREE_LABELS = {
+    'Major': ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'],
+    'Natural Minor': ['I', 'II', 'bIII', 'IV', 'V', 'bVI', 'bVII'],
+    'Harmonic Minor': ['I', 'II', 'bIII', 'IV', 'V', 'bVI', 'VII'],
+    'Major Pentatonic': ['I', 'II', 'III', 'V', 'VI'],
+    'Minor Pentatonic': ['I', 'bIII', 'IV', 'V', 'bVII'],
+    'Dorian': ['I', 'II', 'bIII', 'IV', 'V', 'VI', 'bVII'],
+    'Phrygian': ['I', 'bII', 'bIII', 'IV', 'V', 'bVI', 'bVII'],
+    'Lydian': ['I', 'II', 'III', '#IV', 'V', 'VI', 'VII'],
+    'Mixolydian': ['I', 'II', 'III', 'IV', 'V', 'VI', 'bVII'],
+    'Locrian': ['I', 'bII', 'bIII', 'IV', 'bV', 'bVI', 'bVII']
+  };
+
   // --- Модель: нота на позиции ---
   function noteIndexFromName(name) {
     const i = NOTES.indexOf(name);
@@ -66,15 +80,35 @@
     scaleTypeSelect.appendChild(o);
   });
 
+  // Сдвиг строя всех струн на полтона вверх или вниз
+  function shiftTuningUp() {
+    for (let i = 0; i < numStrings; i++) {
+      const idx = noteIndexFromName(tuning[i]);
+      tuning[i] = NOTES[(idx + 1) % 12];
+    }
+    buildTuningControls();
+    renderFretboard();
+    updateScaleLegend();
+    saveState();
+  }
+
+  function shiftTuningDown() {
+    for (let i = 0; i < numStrings; i++) {
+      const idx = noteIndexFromName(tuning[i]);
+      tuning[i] = NOTES[(idx - 1 + 12) % 12];
+    }
+    buildTuningControls();
+    renderFretboard();
+    updateScaleLegend();
+    saveState();
+  }
+
   // Построение блока строя (6 или 7 select)
   function buildTuningControls() {
     tuningContainer.innerHTML = '';
     for (let i = 0; i < numStrings; i++) {
       const label = document.createElement('label');
       label.className = 'tuning-label';
-      const span = document.createElement('span');
-      span.className = 'tuning-string-num';
-      span.textContent = (i + 1) + '.';
       const sel = document.createElement('select');
       sel.setAttribute('aria-label', 'Струна ' + (i + 1));
       NOTES.forEach(function (n) {
@@ -90,7 +124,6 @@
         updateScaleLegend();
         saveState();
       });
-      label.appendChild(span);
       label.appendChild(sel);
       tuningContainer.appendChild(label);
     }
@@ -123,7 +156,8 @@
       cell.textContent = f;
       fretboardEl.appendChild(cell);
     }
-    for (let s = 0; s < numStrings; s++) {
+    // Строки грифа сверху вниз: 1-я струна (тонкая) — сверху, 6/7-я (толстая) — снизу
+    for (let s = numStrings - 1; s >= 0; s--) {
       for (let f = 0; f < NUM_FRETS; f++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
@@ -146,9 +180,30 @@
   function updateScaleLegend() {
     const rootName = rootSelect.value;
     const scaleName = scaleTypeSelect.value;
-    const indices = getScaleNoteIndices();
-    const names = Array.from(indices).sort(function (a, b) { return a - b; }).map(function (i) { return NOTES[i]; });
-    scaleLegendEl.innerHTML = '<strong>Ноты в тональности ' + rootName + ' ' + scaleName + ':</strong> ' + names.join(', ');
+    const rootIdx = noteIndexFromName(rootName);
+    const intervals = SCALES[scaleName] || SCALES['Major'];
+    const degreeLabels = DEGREE_LABELS[scaleName] || DEGREE_LABELS['Major'];
+    scaleLegendEl.innerHTML = '';
+    const title = document.createElement('strong');
+    title.textContent = 'Ноты в тональности ' + rootName + ' ' + scaleName + ':';
+    scaleLegendEl.appendChild(title);
+    const block = document.createElement('div');
+    block.className = 'scale-legend-block';
+    for (let i = 0; i < intervals.length; i++) {
+      const noteIndex = (rootIdx + intervals[i]) % 12;
+      const col = document.createElement('div');
+      col.className = 'scale-legend-col';
+      const noteSpan = document.createElement('span');
+      noteSpan.className = 'scale-legend-note';
+      noteSpan.textContent = NOTES[noteIndex];
+      const degreeSpan = document.createElement('span');
+      degreeSpan.className = 'scale-legend-degree';
+      degreeSpan.textContent = degreeLabels[i] || '';
+      col.appendChild(noteSpan);
+      col.appendChild(degreeSpan);
+      block.appendChild(col);
+    }
+    scaleLegendEl.appendChild(block);
   }
 
   // Переключение 6/7 струн
@@ -213,6 +268,11 @@
       setTheme(!isDarkTheme());
     });
   }
+
+  const tuningShiftUpEl = document.getElementById('tuning-shift-up');
+  const tuningShiftDownEl = document.getElementById('tuning-shift-down');
+  if (tuningShiftUpEl) tuningShiftUpEl.addEventListener('click', shiftTuningUp);
+  if (tuningShiftDownEl) tuningShiftDownEl.addEventListener('click', shiftTuningDown);
 
   function saveState() {
     try {
