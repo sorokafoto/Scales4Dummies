@@ -1,0 +1,297 @@
+/* Scales4Dummies — минималистичные стили грифа */
+
+:root {
+  --bg: #f5f5f0;
+  --fg: #1a1a1a;
+  --grid: #333;
+  --fret-marker: #666;
+  --in-scale: #c8e6c9;
+  --in-scale-border: #81c784;
+  --cell-height: 28px;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --header-border: #ddd;
+  --control-border: #ccc;
+  --control-bg: #fff;
+  --muted: #555;
+  --fret-note-muted: #888;
+  --hover-match: #e57373;
+  --hover-match-border: #c62828;
+}
+
+body.theme-dark {
+  --bg: #252526;
+  --fg: #e0e0e0;
+  --grid: #555;
+  --fret-marker: #888;
+  --in-scale: #2d4a2d;
+  --in-scale-border: #3d5a3d;
+  --header-border: #404040;
+  --control-border: #404040;
+  --control-bg: #2d2d2d;
+  --muted: #b0b0b0;
+  --fret-note-muted: #666;
+  --hover-match: #8b3a3a;
+  --hover-match-border: #a04444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--fg);
+  background: var(--bg);
+  line-height: 1.4;
+}
+
+.header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--header-border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.header-title {
+  min-width: 0;
+}
+
+.header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.tagline {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.theme-toggle {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  background: var(--control-bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  opacity: 0.9;
+}
+
+.main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 2rem;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.control-group {
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  min-width: 0;
+  background: var(--control-bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.control-group legend {
+  font-weight: 600;
+  padding: 0 0.25rem;
+}
+
+.radio-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.tuning-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tuning-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.tuning-shift {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex-shrink: 0;
+}
+
+.tuning-shift-btn {
+  width: 3.5rem;
+  min-width: 3.5rem;
+  font-size: 0.65rem;
+  padding: 0.15rem;
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  background: var(--control-bg);
+  color: var(--fg);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.tuning-shift-btn:hover {
+  opacity: 0.9;
+}
+
+.tuning-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.tuning-row select {
+  min-width: 3.5rem;
+}
+
+.scale-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.scale-row label {
+  font-weight: 500;
+}
+
+select {
+  font-size: 0.95rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  background: var(--control-bg);
+  color: var(--fg);
+}
+
+/* Гриф */
+.fretboard-section {
+  width: 100%;
+  padding-bottom: 0.5rem;
+}
+
+.fretboard {
+  display: grid;
+  width: 100%;
+  gap: 0;
+  border: 2px solid var(--grid);
+  border-radius: 6px;
+  background: var(--fretboard-bg, var(--bg));
+}
+
+body:not(.theme-dark) .fretboard {
+  --fretboard-bg: #ebe8e0;
+}
+
+body.theme-dark .fretboard {
+  --fretboard-bg: #1e1e1e;
+}
+
+.fretboard .cell {
+  min-width: 0;
+  height: var(--cell-height);
+  min-height: var(--cell-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cell-border, #ddd);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--fret-note-muted);
+}
+
+body.theme-dark .fretboard .cell {
+  --cell-border: #404040;
+}
+
+.fretboard .cell.fret-0 {
+  background: var(--fret-0-bg, #e8e8e0);
+  border-left: 2px solid var(--grid);
+}
+
+body.theme-dark .fretboard .cell.fret-0 {
+  --fret-0-bg: #333;
+}
+
+.fretboard .cell.in-scale {
+  background: var(--in-scale);
+  border-color: var(--in-scale-border);
+  color: var(--fg);
+}
+
+.fretboard .cell.in-scale.hover-match {
+  background: var(--hover-match);
+  border-color: var(--hover-match-border);
+}
+
+.fretboard .fret-label {
+  font-size: 0.65rem;
+  color: var(--fret-marker);
+  font-weight: 600;
+}
+
+.fretboard .cell.fret-label {
+  color: var(--fret-marker);
+}
+
+/* Легенда тональности */
+.scale-legend {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.scale-legend strong {
+  color: var(--fg);
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.scale-legend-block {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: flex-start;
+}
+
+.scale-legend-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 2.5em;
+}
+
+.scale-legend-col .scale-legend-note {
+  display: block;
+}
+
+.scale-legend-col .scale-legend-degree {
+  font-size: 0.85em;
+  color: var(--fret-marker);
+  margin-top: 0.15rem;
+}
