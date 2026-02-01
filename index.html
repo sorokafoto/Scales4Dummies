@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scales4Dummies — интерактивный гриф гитары</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-title">
+      <h1>Scales4Dummies</h1>
+      <p class="tagline">Интерактивный гриф гитары: строй, тональность, подсветка нот</p>
+    </div>
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Переключить тему: светлая / тёмная">День / Ночь</button>
+  </header>
+
+  <main class="main">
+    <section class="controls" aria-label="Настройки грифа">
+      <fieldset class="control-group">
+        <legend>Количество струн</legend>
+        <div class="radio-row">
+          <label>
+            <input type="radio" name="strings" value="6" checked> 6 струн
+          </label>
+          <label>
+            <input type="radio" name="strings" value="7"> 7 струн
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="control-group tuning-group">
+        <legend>Строй (от толстой к тонкой)</legend>
+        <div id="tuning-controls" class="tuning-row"></div>
+      </fieldset>
+
+      <fieldset class="control-group">
+        <legend>Тональность</legend>
+        <div class="scale-row">
+          <label for="root">Тоника</label>
+          <select id="root" aria-label="Тоника тональности"></select>
+          <label for="scale-type">Тип</label>
+          <select id="scale-type" aria-label="Тип тональности"></select>
+        </div>
+      </fieldset>
+    </section>
+
+    <section class="fretboard-section" aria-label="Гриф гитары">
+      <div id="fretboard" class="fretboard" role="img" aria-label="Гриф гитары с подсвеченными нотами выбранной тональности"></div>
+      <div id="scale-legend" class="scale-legend" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
