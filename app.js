@@ -58,12 +58,19 @@
   const rootSelect = document.getElementById('root');
   const scaleTypeSelect = document.getElementById('scale-type');
   const tuningContainer = document.getElementById('tuning-controls');
+  const fretLabelsEl = document.getElementById('fret-labels');
   const fretboardEl = document.getElementById('fretboard');
   const scaleLegendEl = document.getElementById('scale-legend');
   const stringsRadios = document.querySelectorAll('input[name="strings"]');
+  const progressionPanelEl = document.getElementById('progression-panel');
+  const progressionDegreesEl = document.getElementById('progression-degrees');
+  const progressionSequenceEl = document.getElementById('progression-sequence');
+  const progressionClearBtn = document.getElementById('progression-clear');
 
   let numStrings = 6;
   let tuning = TUNING_6.slice();
+  let progressionSequence = [];
+  let progressionStepIndex = null;
 
   // Заполнение select тоники и типа тональности
   NOTES.forEach(function (n) {
@@ -142,21 +149,51 @@
     return set;
   }
 
-  // Отрисовка грифа: первая строка — номера ладов 0..24, далее по строке на каждую струну
+  // Упорядоченный массив нот тональности (индексы 0–11) по ступеням
+  function getScaleOrderedNoteIndices() {
+    const rootName = rootSelect.value;
+    const scaleName = scaleTypeSelect.value;
+    const rootIdx = noteIndexFromName(rootName);
+    const intervals = SCALES[scaleName] || SCALES['Major'];
+    return intervals.map(function (step) { return (rootIdx + step) % 12; });
+  }
+
+  // Индексы нот (0–11) для трезвучия по ступени: degreeIndex 0..scaleLength-1
+  function getChordNoteIndices(degreeIndex) {
+    const ordered = getScaleOrderedNoteIndices();
+    const len = ordered.length;
+    if (len === 0) return new Set();
+    const set = new Set();
+    [0, 2, 4].forEach(function (offset) {
+      set.add(ordered[(degreeIndex + offset) % len]);
+    });
+    return set;
+  }
+
+  // Отрисовка грифа: номера ладов — в отдельном ряду сверху, гриф — только ноты по струнам
   function renderFretboard() {
     clearHoverMatch();
+    fretboardEl.querySelectorAll('.chord-highlight').forEach(function (el) { el.classList.remove('chord-highlight'); });
     const scaleIndices = getScaleNoteIndices();
+    let chordHighlightIndices = null;
+    if (progressionStepIndex !== null && progressionSequence[progressionStepIndex] !== undefined) {
+      chordHighlightIndices = getChordNoteIndices(progressionSequence[progressionStepIndex]);
+    }
+
+    if (fretLabelsEl) {
+      fretLabelsEl.innerHTML = '';
+      fretLabelsEl.style.gridTemplateColumns = 'repeat(' + NUM_FRETS + ', minmax(0, 1fr))';
+      for (let f = 0; f < NUM_FRETS; f++) {
+        const cell = document.createElement('div');
+        cell.className = 'fret-label-cell';
+        cell.textContent = f;
+        fretLabelsEl.appendChild(cell);
+      }
+    }
+
     fretboardEl.innerHTML = '';
     fretboardEl.style.gridTemplateColumns = 'repeat(' + NUM_FRETS + ', minmax(0, 1fr))';
-    fretboardEl.style.gridTemplateRows = 'auto repeat(' + numStrings + ', var(--cell-height))';
-
-    for (let f = 0; f < NUM_FRETS; f++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell fret-label';
-      cell.textContent = f;
-      fretboardEl.appendChild(cell);
-    }
-    // Строки грифа сверху вниз: 1-я струна (тонкая) — сверху, 6/7-я (толстая) — снизу
+    fretboardEl.style.gridTemplateRows = 'repeat(' + numStrings + ', var(--cell-height))';
     for (let s = numStrings - 1; s >= 0; s--) {
       for (let f = 0; f < NUM_FRETS; f++) {
         const cell = document.createElement('div');
@@ -166,6 +203,7 @@
         cell.textContent = note.name;
         cell.setAttribute('data-note-index', note.index);
         if (scaleIndices.has(note.index)) cell.classList.add('in-scale');
+        if (chordHighlightIndices && chordHighlightIndices.has(note.index)) cell.classList.add('chord-highlight');
         fretboardEl.appendChild(cell);
       }
     }
@@ -223,15 +261,80 @@
   });
 
   rootSelect.addEventListener('change', function () {
+    renderProgressionDegrees();
+    renderProgressionSequence();
     renderFretboard();
     updateScaleLegend();
     saveState();
   });
   scaleTypeSelect.addEventListener('change', function () {
+    renderProgressionDegrees();
+    renderProgressionSequence();
     renderFretboard();
     updateScaleLegend();
     saveState();
   });
+
+  // --- Chord Progressions ---
+  function renderProgressionDegrees() {
+    if (!progressionDegreesEl) return;
+    const scaleName = scaleTypeSelect.value;
+    const degreeLabels = DEGREE_LABELS[scaleName] || DEGREE_LABELS['Major'];
+    progressionDegreesEl.innerHTML = '';
+    degreeLabels.forEach(function (label, index) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'progression-degree-btn';
+      btn.textContent = label;
+      btn.setAttribute('data-degree-index', index);
+      btn.setAttribute('aria-label', 'Добавить ступень ' + label);
+      btn.addEventListener('click', function () {
+        progressionSequence.push(index);
+        renderProgressionSequence();
+        renderFretboard();
+      });
+      progressionDegreesEl.appendChild(btn);
+    });
+  }
+
+  function renderProgressionSequence() {
+    if (!progressionSequenceEl) return;
+    const scaleName = scaleTypeSelect.value;
+    const degreeLabels = DEGREE_LABELS[scaleName] || DEGREE_LABELS['Major'];
+    progressionSequenceEl.innerHTML = '';
+    progressionSequence.forEach(function (degreeIndex, index) {
+      const label = degreeLabels[degreeIndex] != null ? degreeLabels[degreeIndex] : '?';
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'progression-sequence-item' + (progressionStepIndex === index ? ' selected' : '');
+      btn.textContent = label;
+      btn.setAttribute('aria-label', 'Аккорд ' + label + ', выбрать для подсветки на грифе');
+      btn.addEventListener('click', function () {
+        progressionStepIndex = index;
+        renderProgressionSequence();
+        renderFretboard();
+      });
+      li.appendChild(btn);
+      progressionSequenceEl.appendChild(li);
+      if (index < progressionSequence.length - 1) {
+        const sep = document.createElement('li');
+        sep.className = 'progression-sequence-sep';
+        sep.textContent = '–';
+        sep.setAttribute('aria-hidden', 'true');
+        progressionSequenceEl.appendChild(sep);
+      }
+    });
+  }
+
+  function clearProgression() {
+    progressionSequence = [];
+    progressionStepIndex = null;
+    renderProgressionSequence();
+    renderFretboard();
+  }
+
+  if (progressionClearBtn) progressionClearBtn.addEventListener('click', clearProgression);
 
   // --- localStorage ---
   const STORAGE_KEY = 'scales4dummies';
@@ -327,4 +430,6 @@
   buildTuningControls();
   renderFretboard();
   updateScaleLegend();
+  renderProgressionDegrees();
+  renderProgressionSequence();
 })();

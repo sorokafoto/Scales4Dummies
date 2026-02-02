@@ -88,11 +88,161 @@ body {
   opacity: 0.9;
 }
 
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
 .main {
   max-width: 1400px;
   margin: 0 auto;
   padding: 1rem 1.5rem 2rem;
 }
+
+.hidden {
+  display: none !important;
+}
+
+.btn {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  background: var(--control-bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn:focus-visible,
+.progression-degree-btn:focus-visible,
+.tuning-shift-btn:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.btn-secondary {
+  background: var(--muted);
+  color: var(--bg);
+  border-color: var(--muted);
+}
+
+.btn-icon {
+  padding: 0.35rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon .icon-trash {
+  display: block;
+}
+
+.btn-trash {
+  background: transparent;
+  border-color: var(--control-border);
+  color: var(--muted);
+}
+
+.btn-trash:hover {
+  color: var(--fg);
+  border-color: var(--muted);
+}
+
+/* Chord Progressions */
+.progression-panel {
+  margin-bottom: 1.5rem;
+}
+
+.progression-degrees {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.progression-degree-btn {
+  min-width: 2.5rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  background: var(--control-bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.progression-degree-btn:hover {
+  border-color: var(--in-scale-border);
+  background: var(--in-scale);
+}
+
+.progression-sequence-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.progression-sequence-label {
+  font-weight: 500;
+}
+
+.progression-sequence {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.progression-sequence-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: 1em;
+  margin: 0;
+  min-width: 0;
+}
+
+.progression-sequence-item:hover {
+  border-color: var(--in-scale-border);
+}
+
+.progression-sequence-item.selected {
+  border-color: var(--hover-match-border);
+  background: var(--hover-match);
+}
+
+.progression-sequence-item:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.progression-sequence-sep {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.fretboard .cell.chord-highlight {
+  box-shadow: inset 0 0 0 2px var(--hover-match-border);
+  background: var(--hover-match);
+}
+
 
 .controls {
   display: flex;
@@ -189,10 +339,37 @@ select {
   color: var(--fg);
 }
 
+select:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
 /* Гриф */
 .fretboard-section {
   width: 100%;
   padding-bottom: 0.5rem;
+}
+
+.fretboard-wrapper {
+  width: 100%;
+}
+
+.fret-labels {
+  display: grid;
+  width: 100%;
+  gap: 0;
+  padding: 0.25rem 0 0.5rem;
+  background: var(--bg);
+}
+
+.fret-label-cell {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--fret-marker);
 }
 
 .fretboard {
@@ -247,16 +424,6 @@ body.theme-dark .fretboard .cell.fret-0 {
 .fretboard .cell.in-scale.hover-match {
   background: var(--hover-match);
   border-color: var(--hover-match-border);
-}
-
-.fretboard .fret-label {
-  font-size: 0.65rem;
-  color: var(--fret-marker);
-  font-weight: 600;
-}
-
-.fretboard .cell.fret-label {
-  color: var(--fret-marker);
 }
 
 /* Легенда тональности */
