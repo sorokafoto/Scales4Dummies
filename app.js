@@ -60,7 +60,6 @@
   const tuningContainer = document.getElementById('tuning-controls');
   const fretLabelsEl = document.getElementById('fret-labels');
   const fretboardEl = document.getElementById('fretboard');
-  const scaleLegendEl = document.getElementById('scale-legend');
   const stringsRadios = document.querySelectorAll('input[name="strings"]');
   const progressionPanelEl = document.getElementById('progression-panel');
   const progressionDegreesEl = document.getElementById('progression-degrees');
@@ -95,7 +94,6 @@
     }
     buildTuningControls();
     renderFretboard();
-    updateScaleLegend();
     saveState();
   }
 
@@ -106,7 +104,6 @@
     }
     buildTuningControls();
     renderFretboard();
-    updateScaleLegend();
     saveState();
   }
 
@@ -128,7 +125,6 @@
       sel.addEventListener('change', function () {
         tuning[i] = sel.value;
         renderFretboard();
-        updateScaleLegend();
         saveState();
       });
       label.appendChild(sel);
@@ -158,6 +154,13 @@
     return intervals.map(function (step) { return (rootIdx + step) % 12; });
   }
 
+  // Название ноты для ступени (индекс 0..scaleLength-1)
+  function getNoteNameForDegree(degreeIndex) {
+    const ordered = getScaleOrderedNoteIndices();
+    const noteIndex = ordered[degreeIndex];
+    return noteIndex !== undefined ? NOTES[noteIndex] : '';
+  }
+
   // Индексы нот (0–11) для трезвучия по ступени: degreeIndex 0..scaleLength-1
   function getChordNoteIndices(degreeIndex) {
     const ordered = getScaleOrderedNoteIndices();
@@ -170,14 +173,24 @@
     return set;
   }
 
+  // Индекс тоники (root) аккорда по ступени: одна нота 0–11
+  function getChordRootNoteIndex(degreeIndex) {
+    const ordered = getScaleOrderedNoteIndices();
+    return ordered[degreeIndex];
+  }
+
   // Отрисовка грифа: номера ладов — в отдельном ряду сверху, гриф — только ноты по струнам
   function renderFretboard() {
     clearHoverMatch();
     fretboardEl.querySelectorAll('.chord-highlight').forEach(function (el) { el.classList.remove('chord-highlight'); });
+    fretboardEl.querySelectorAll('.chord-root').forEach(function (el) { el.classList.remove('chord-root'); });
     const scaleIndices = getScaleNoteIndices();
     let chordHighlightIndices = null;
+    let chordRootNoteIndex = null;
     if (progressionStepIndex !== null && progressionSequence[progressionStepIndex] !== undefined) {
-      chordHighlightIndices = getChordNoteIndices(progressionSequence[progressionStepIndex]);
+      const deg = progressionSequence[progressionStepIndex];
+      chordHighlightIndices = getChordNoteIndices(deg);
+      chordRootNoteIndex = getChordRootNoteIndex(deg);
     }
 
     if (fretLabelsEl) {
@@ -204,6 +217,7 @@
         cell.setAttribute('data-note-index', note.index);
         if (scaleIndices.has(note.index)) cell.classList.add('in-scale');
         if (chordHighlightIndices && chordHighlightIndices.has(note.index)) cell.classList.add('chord-highlight');
+        if (chordRootNoteIndex !== null && note.index === chordRootNoteIndex) cell.classList.add('chord-root');
         fretboardEl.appendChild(cell);
       }
     }
@@ -215,42 +229,12 @@
     });
   }
 
-  function updateScaleLegend() {
-    const rootName = rootSelect.value;
-    const scaleName = scaleTypeSelect.value;
-    const rootIdx = noteIndexFromName(rootName);
-    const intervals = SCALES[scaleName] || SCALES['Major'];
-    const degreeLabels = DEGREE_LABELS[scaleName] || DEGREE_LABELS['Major'];
-    scaleLegendEl.innerHTML = '';
-    const title = document.createElement('strong');
-    title.textContent = 'Ноты в тональности ' + rootName + ' ' + scaleName + ':';
-    scaleLegendEl.appendChild(title);
-    const block = document.createElement('div');
-    block.className = 'scale-legend-block';
-    for (let i = 0; i < intervals.length; i++) {
-      const noteIndex = (rootIdx + intervals[i]) % 12;
-      const col = document.createElement('div');
-      col.className = 'scale-legend-col';
-      const noteSpan = document.createElement('span');
-      noteSpan.className = 'scale-legend-note';
-      noteSpan.textContent = NOTES[noteIndex];
-      const degreeSpan = document.createElement('span');
-      degreeSpan.className = 'scale-legend-degree';
-      degreeSpan.textContent = degreeLabels[i] || '';
-      col.appendChild(noteSpan);
-      col.appendChild(degreeSpan);
-      block.appendChild(col);
-    }
-    scaleLegendEl.appendChild(block);
-  }
-
   // Переключение 6/7 струн
   function setNumStrings(n) {
     numStrings = n;
     tuning = (n === 7 ? TUNING_7 : TUNING_6).slice();
     buildTuningControls();
     renderFretboard();
-    updateScaleLegend();
     saveState();
   }
 
@@ -264,14 +248,12 @@
     renderProgressionDegrees();
     renderProgressionSequence();
     renderFretboard();
-    updateScaleLegend();
     saveState();
   });
   scaleTypeSelect.addEventListener('change', function () {
     renderProgressionDegrees();
     renderProgressionSequence();
     renderFretboard();
-    updateScaleLegend();
     saveState();
   });
 
@@ -282,12 +264,13 @@
     const degreeLabels = DEGREE_LABELS[scaleName] || DEGREE_LABELS['Major'];
     progressionDegreesEl.innerHTML = '';
     degreeLabels.forEach(function (label, index) {
+      const noteName = getNoteNameForDegree(index);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'progression-degree-btn';
-      btn.textContent = label;
+      btn.textContent = noteName ? noteName + ' ' + label : label;
       btn.setAttribute('data-degree-index', index);
-      btn.setAttribute('aria-label', 'Добавить ступень ' + label);
+      btn.setAttribute('aria-label', noteName ? 'Добавить ' + noteName + ' (' + label + ')' : 'Добавить ступень ' + label);
       btn.addEventListener('click', function () {
         progressionSequence.push(index);
         renderProgressionSequence();
@@ -429,7 +412,6 @@
   loadState();
   buildTuningControls();
   renderFretboard();
-  updateScaleLegend();
   renderProgressionDegrees();
   renderProgressionSequence();
 })();
