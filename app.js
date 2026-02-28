@@ -245,12 +245,16 @@
   });
 
   rootSelect.addEventListener('change', function () {
+    progressionSequence = [];
+    progressionStepIndex = null;
     renderProgressionDegrees();
     renderProgressionSequence();
     renderFretboard();
     saveState();
   });
   scaleTypeSelect.addEventListener('change', function () {
+    progressionSequence = [];
+    progressionStepIndex = null;
     renderProgressionDegrees();
     renderProgressionSequence();
     renderFretboard();
