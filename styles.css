@@ -16,10 +16,9 @@
   --fret-note-muted: #77777777;
   --hover-match: #add1e0;
   --hover-match-border: #81c784;
-  --chord-highlight-bg: #e57373;
-  --chord-highlight-border: #c62828;
-  --chord-root-bg: #c62828;
-  --chord-root-fg: #000000;
+  --chord-highlight-bg: #ef9a9a;
+  --chord-highlight-border: #e57373;
+  --chord-root-ring: #b71c1c;
 }
 
 body.theme-dark {
@@ -36,10 +35,9 @@ body.theme-dark {
   --fret-note-muted: #77777777;
   --hover-match: #4F959D;
   --hover-match-border: #3d5a3d;
-  --chord-highlight-bg: #8b3a3a;
-  --chord-highlight-border: #a04444;
-  --chord-root-bg: #a04444;
-  --chord-root-fg: #e0e0e0;
+  --chord-highlight-bg: #6d3a3a;
+  --chord-highlight-border: #8b4a4a;
+  --chord-root-ring: #ef9a9a;
 }
 
 * {
@@ -282,9 +280,10 @@ body.theme-dark .btn-trash:hover {
 }
 
 .fretboard .cell.chord-root {
-  background: var(--chord-root-bg);
-  color: var(--chord-root-fg);
-  border-color: var(--chord-root-bg);
+  background: var(--chord-highlight-bg);
+  color: var(--fg);
+  border-color: var(--chord-highlight-border);
+  box-shadow: inset 0 0 0 2px var(--chord-root-ring);
   font-weight: 700;
 }
 
@@ -477,9 +476,10 @@ body.theme-dark .fretboard .cell.fret-0 {
 }
 
 .fretboard .cell.in-scale.chord-root {
-  background: var(--chord-root-bg);
-  color: var(--chord-root-fg);
-  border-color: var(--chord-root-bg);
+  background: var(--chord-highlight-bg);
+  color: var(--fg);
+  border-color: var(--chord-highlight-border);
+  box-shadow: inset 0 0 0 2px var(--chord-root-ring);
   font-weight: 700;
 }
 
