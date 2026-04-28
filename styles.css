@@ -280,15 +280,6 @@ body.theme-dark .btn-trash:hover {
   border-color: var(--chord-highlight-border);
 }
 
-.fretboard .cell.chord-root {
-  background: var(--chord-highlight-bg);
-  color: var(--fg);
-  border-color: var(--chord-highlight-border);
-  box-shadow: inset 0 0 0 2px var(--chord-root-ring);
-  font-weight: 700;
-}
-
-
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -477,12 +468,7 @@ body.theme-dark .fretboard .cell.fret-0 {
 }
 
 .fretboard .cell.in-scale.hover-chord-root {
-  background: var(--chord-highlight-bg);
   font-weight: 700;
-}
-
-.fretboard .cell.in-scale.hover-chord.hover-chord-root {
-  border-color: var(--in-scale-border);
 }
 
 .fretboard .cell.in-scale.chord-highlight {
@@ -491,13 +477,8 @@ body.theme-dark .fretboard .cell.fret-0 {
 }
 
 .fretboard .cell.in-scale.chord-root {
-  background: var(--chord-highlight-bg);
   color: var(--fg);
   font-weight: 700;
-}
-
-.fretboard .cell.in-scale.chord-highlight.chord-root {
-  border-color: var(--in-scale-border);
 }
 
 .fretboard .cell .note-text {

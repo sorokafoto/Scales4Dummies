@@ -183,11 +183,14 @@
   function renderFretboard() {
     clearHoverMatch();
     fretboardEl.querySelectorAll('.chord-highlight').forEach(function (el) { el.classList.remove('chord-highlight'); });
+    fretboardEl.querySelectorAll('.chord-root').forEach(function (el) { el.classList.remove('chord-root'); });
     const scaleIndices = getScaleNoteIndices();
     let chordHighlightIndices = null;
+    let chordRootNoteIndex = null;
     if (progressionStepIndex !== null && progressionSequence[progressionStepIndex] !== undefined) {
       const deg = progressionSequence[progressionStepIndex];
       chordHighlightIndices = getChordNoteIndices(deg);
+      chordRootNoteIndex = getChordRootNoteIndex(deg);
     }
 
     if (fretLabelsEl) {
@@ -217,6 +220,7 @@
         cell.setAttribute('data-note-index', note.index);
         if (scaleIndices.has(note.index)) cell.classList.add('in-scale');
         if (chordHighlightIndices && chordHighlightIndices.has(note.index)) cell.classList.add('chord-highlight');
+        if (chordRootNoteIndex !== null && note.index === chordRootNoteIndex) cell.classList.add('chord-root');
         fretboardEl.appendChild(cell);
       }
     }
