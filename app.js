@@ -65,6 +65,7 @@
   const progressionDegreesEl = document.getElementById('progression-degrees');
   const progressionSequenceEl = document.getElementById('progression-sequence');
   const progressionClearBtn = document.getElementById('progression-clear');
+  const riffAnchorsEl = document.getElementById('riff-anchors');
 
   let numStrings = 6;
   let tuning = TUNING_6.slice();
@@ -229,6 +230,13 @@
     });
   }
 
+  function highlightNoteIndex(noteIndex) {
+    clearHoverMatch();
+    fretboardEl.querySelectorAll('.cell.in-scale[data-note-index="' + noteIndex + '"]').forEach(function (el) {
+      el.classList.add('hover-match');
+    });
+  }
+
   // Переключение 6/7 струн
   function setNumStrings(n) {
     numStrings = n;
@@ -249,6 +257,7 @@
     progressionStepIndex = null;
     renderProgressionDegrees();
     renderProgressionSequence();
+    renderRiffAnchors();
     renderFretboard();
     saveState();
   });
@@ -257,6 +266,7 @@
     progressionStepIndex = null;
     renderProgressionDegrees();
     renderProgressionSequence();
+    renderRiffAnchors();
     renderFretboard();
     saveState();
   });
@@ -272,12 +282,13 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'progression-degree-btn';
-      btn.textContent = noteName ? noteName + ' ' + label : label;
+      btn.textContent = noteName ? label + ' · ' + noteName : label;
       btn.setAttribute('data-degree-index', index);
-      btn.setAttribute('aria-label', noteName ? 'Добавить ' + noteName + ' (' + label + ')' : 'Добавить ступень ' + label);
+      btn.setAttribute('aria-label', noteName ? 'Добавить ' + label + ' · ' + noteName : 'Добавить ступень ' + label);
       btn.addEventListener('click', function () {
         progressionSequence.push(index);
         renderProgressionSequence();
+        renderRiffAnchors();
         renderFretboard();
       });
       progressionDegreesEl.appendChild(btn);
@@ -291,14 +302,16 @@
     progressionSequenceEl.innerHTML = '';
     progressionSequence.forEach(function (degreeIndex, index) {
       const label = degreeLabels[degreeIndex] != null ? degreeLabels[degreeIndex] : '?';
+      const noteName = getNoteNameForDegree(degreeIndex);
+      const itemText = noteName ? label + ' · ' + noteName : label;
       const li = document.createElement('li');
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'progression-sequence-item' + (progressionStepIndex === index ? ' selected' : '');
-      btn.textContent = label;
-      btn.setAttribute('aria-label', 'Аккорд ' + label + ', выбрать для подсветки на грифе');
+      btn.textContent = itemText;
+      btn.setAttribute('aria-label', 'Аккорд ' + itemText + ', выбрать для подсветки на грифе');
       btn.addEventListener('click', function () {
-        progressionStepIndex = index;
+        progressionStepIndex = progressionStepIndex === index ? null : index;
         renderProgressionSequence();
         renderFretboard();
       });
@@ -314,10 +327,66 @@
     });
   }
 
+  function getRiffAnchorGroups() {
+    return progressionSequence.map(function (degreeIndex, index) {
+      const noteIndex = getChordRootNoteIndex(degreeIndex);
+      return {
+        noteIndex: noteIndex,
+        noteName: noteIndex !== undefined ? NOTES[noteIndex] : '',
+        step: index + 1
+      };
+    }).filter(function (anchor) {
+      return anchor.noteIndex !== undefined;
+    });
+  }
+
+  function renderRiffAnchors() {
+    if (!riffAnchorsEl) return;
+    riffAnchorsEl.innerHTML = '';
+
+    const groups = getRiffAnchorGroups();
+    if (groups.length === 0) {
+      const emptyItem = document.createElement('li');
+      emptyItem.className = 'riff-anchor-empty';
+      emptyItem.textContent = 'добавь аккорды в цепочку';
+      riffAnchorsEl.appendChild(emptyItem);
+      return;
+    }
+
+    groups.forEach(function (anchor) {
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      const noteSpan = document.createElement('span');
+      const stepsSpan = document.createElement('span');
+      const stepText = String(anchor.step);
+      btn.type = 'button';
+      btn.className = 'riff-anchor';
+      btn.setAttribute('data-note-index', anchor.noteIndex);
+      btn.setAttribute('aria-label', 'Опора ' + anchor.noteName + ', шаг ' + stepText);
+      noteSpan.className = 'riff-anchor-note';
+      noteSpan.textContent = anchor.noteName;
+      stepsSpan.className = 'riff-anchor-steps';
+      stepsSpan.textContent = stepText;
+      btn.appendChild(noteSpan);
+      btn.appendChild(stepsSpan);
+      btn.addEventListener('mouseenter', function () {
+        highlightNoteIndex(anchor.noteIndex);
+      });
+      btn.addEventListener('mouseleave', clearHoverMatch);
+      btn.addEventListener('focus', function () {
+        highlightNoteIndex(anchor.noteIndex);
+      });
+      btn.addEventListener('blur', clearHoverMatch);
+      li.appendChild(btn);
+      riffAnchorsEl.appendChild(li);
+    });
+  }
+
   function clearProgression() {
     progressionSequence = [];
     progressionStepIndex = null;
     renderProgressionSequence();
+    renderRiffAnchors();
     renderFretboard();
   }
 
@@ -401,10 +470,7 @@
     if (!cell.classList.contains('in-scale')) return;
     var noteIndex = cell.getAttribute('data-note-index');
     if (noteIndex === null) return;
-    clearHoverMatch();
-    fretboardEl.querySelectorAll('.cell.in-scale[data-note-index="' + noteIndex + '"]').forEach(function (el) {
-      el.classList.add('hover-match');
-    });
+    highlightNoteIndex(noteIndex);
   });
   fretboardEl.addEventListener('mouseout', function (e) {
     if (fretboardEl.contains(e.relatedTarget)) return;
@@ -418,4 +484,5 @@
   renderFretboard();
   renderProgressionDegrees();
   renderProgressionSequence();
+  renderRiffAnchors();
 })();

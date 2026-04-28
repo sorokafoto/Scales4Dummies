@@ -19,6 +19,9 @@
   --chord-highlight-bg: #ef9a9a;
   --chord-highlight-border: #e57373;
   --chord-root-ring: #b71c1c;
+  --riff-anchor-bg: #f2f2ec;
+  --riff-anchor-border: #c8c8bc;
+  --riff-anchor-step-bg: #e0e0d5;
 }
 
 body.theme-dark {
@@ -38,6 +41,9 @@ body.theme-dark {
   --chord-highlight-bg: #6d3a3a;
   --chord-highlight-border: #8b4a4a;
   --chord-root-ring: #ef9a9a;
+  --riff-anchor-bg: #2d2d2d;
+  --riff-anchor-border: #555;
+  --riff-anchor-step-bg: #404040;
 }
 
 * {
@@ -431,6 +437,70 @@ body:not(.theme-dark) .fretboard {
 
 body.theme-dark .fretboard {
   --fretboard-bg: #1e1e1e;
+}
+
+.riff-anchors-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.75rem 0 0;
+}
+
+.riff-anchors-label {
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.riff-anchors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.riff-anchor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--riff-anchor-border);
+  border-radius: 999px;
+  background: var(--riff-anchor-bg);
+  color: var(--fg);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.riff-anchor:hover,
+.riff-anchor:focus-visible {
+  border-color: var(--hover-match-border);
+  background: var(--hover-match);
+  outline: none;
+}
+
+.riff-anchor-note {
+  min-width: 1.4em;
+  text-align: center;
+}
+
+.riff-anchor-steps {
+  min-width: 1.5em;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  background: var(--riff-anchor-step-bg);
+  color: var(--fg);
+  font-size: 0.8em;
+  text-align: center;
+}
+
+.riff-anchor-empty {
+  color: var(--muted);
+  font-style: italic;
 }
 
 .fretboard .cell {
