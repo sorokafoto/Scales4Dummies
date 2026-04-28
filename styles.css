@@ -16,12 +16,9 @@
   --fret-note-muted: #77777777;
   --hover-match: #add1e0;
   --hover-match-border: #81c784;
-  --chord-highlight-bg: #ef9a9a;
-  --chord-highlight-border: #e57373;
-  --chord-root-ring: #b71c1c;
-  --riff-anchor-bg: #f2f2ec;
-  --riff-anchor-border: #c8c8bc;
-  --riff-anchor-step-bg: #e0e0d5;
+  --chord-highlight-bg: #add1e0;
+  --chord-highlight-border: #4F959D;
+  --chord-root-ring: #1b5f66;
 }
 
 body.theme-dark {
@@ -38,12 +35,9 @@ body.theme-dark {
   --fret-note-muted: #77777777;
   --hover-match: #4F959D;
   --hover-match-border: #3d5a3d;
-  --chord-highlight-bg: #6d3a3a;
-  --chord-highlight-border: #8b4a4a;
-  --chord-root-ring: #ef9a9a;
-  --riff-anchor-bg: #2d2d2d;
-  --riff-anchor-border: #555;
-  --riff-anchor-step-bg: #404040;
+  --chord-highlight-bg: #2b6b73;
+  --chord-highlight-border: #4F959D;
+  --chord-root-ring: #add1e0;
 }
 
 * {
@@ -200,6 +194,7 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 1rem;
+  margin-top: 0.75rem;
 }
 
 .progression-sequence-label {
@@ -439,70 +434,6 @@ body.theme-dark .fretboard {
   --fretboard-bg: #1e1e1e;
 }
 
-.riff-anchors-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.75rem;
-  padding: 0.75rem 0 0;
-}
-
-.riff-anchors-label {
-  font-weight: 600;
-  color: var(--fg);
-}
-
-.riff-anchors {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.riff-anchor {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.25rem 0.45rem;
-  border: 1px solid var(--riff-anchor-border);
-  border-radius: 999px;
-  background: var(--riff-anchor-bg);
-  color: var(--fg);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.riff-anchor:hover,
-.riff-anchor:focus-visible {
-  border-color: var(--hover-match-border);
-  background: var(--hover-match);
-  outline: none;
-}
-
-.riff-anchor-note {
-  min-width: 1.4em;
-  text-align: center;
-}
-
-.riff-anchor-steps {
-  min-width: 1.5em;
-  padding: 0.05rem 0.35rem;
-  border-radius: 999px;
-  background: var(--riff-anchor-step-bg);
-  color: var(--fg);
-  font-size: 0.8em;
-  text-align: center;
-}
-
-.riff-anchor-empty {
-  color: var(--muted);
-  font-style: italic;
-}
-
 .fretboard .cell {
   min-width: 0;
   height: var(--cell-height);
@@ -540,6 +471,20 @@ body.theme-dark .fretboard .cell.fret-0 {
   border-color: var(--hover-match-border);
 }
 
+.fretboard .cell.in-scale.hover-chord {
+  background: var(--chord-highlight-bg);
+  border-color: var(--chord-highlight-border);
+}
+
+.fretboard .cell.in-scale.hover-chord-root {
+  background: var(--chord-highlight-bg);
+  font-weight: 700;
+}
+
+.fretboard .cell.in-scale.hover-chord.hover-chord-root {
+  border-color: var(--in-scale-border);
+}
+
 .fretboard .cell.in-scale.chord-highlight {
   background: var(--chord-highlight-bg);
   border-color: var(--chord-highlight-border);
@@ -548,8 +493,25 @@ body.theme-dark .fretboard .cell.fret-0 {
 .fretboard .cell.in-scale.chord-root {
   background: var(--chord-highlight-bg);
   color: var(--fg);
-  border-color: var(--chord-highlight-border);
-  box-shadow: inset 0 0 0 2px var(--chord-root-ring);
   font-weight: 700;
+}
+
+.fretboard .cell.in-scale.chord-highlight.chord-root {
+  border-color: var(--in-scale-border);
+}
+
+.fretboard .cell .note-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+}
+
+.fretboard .cell.in-scale.hover-chord-root .note-text,
+.fretboard .cell.in-scale.chord-root .note-text {
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--chord-root-ring);
+  border-radius: 999px;
 }
 

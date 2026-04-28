@@ -65,7 +65,6 @@
   const progressionDegreesEl = document.getElementById('progression-degrees');
   const progressionSequenceEl = document.getElementById('progression-sequence');
   const progressionClearBtn = document.getElementById('progression-clear');
-  const riffAnchorsEl = document.getElementById('riff-anchors');
 
   let numStrings = 6;
   let tuning = TUNING_6.slice();
@@ -184,14 +183,11 @@
   function renderFretboard() {
     clearHoverMatch();
     fretboardEl.querySelectorAll('.chord-highlight').forEach(function (el) { el.classList.remove('chord-highlight'); });
-    fretboardEl.querySelectorAll('.chord-root').forEach(function (el) { el.classList.remove('chord-root'); });
     const scaleIndices = getScaleNoteIndices();
     let chordHighlightIndices = null;
-    let chordRootNoteIndex = null;
     if (progressionStepIndex !== null && progressionSequence[progressionStepIndex] !== undefined) {
       const deg = progressionSequence[progressionStepIndex];
       chordHighlightIndices = getChordNoteIndices(deg);
-      chordRootNoteIndex = getChordRootNoteIndex(deg);
     }
 
     if (fretLabelsEl) {
@@ -214,11 +210,13 @@
         cell.className = 'cell';
         if (f === 0) cell.classList.add('fret-0');
         const note = getNoteAt(tuning, s, f);
-        cell.textContent = note.name;
+        const noteSpan = document.createElement('span');
+        noteSpan.className = 'note-text';
+        noteSpan.textContent = note.name;
+        cell.appendChild(noteSpan);
         cell.setAttribute('data-note-index', note.index);
         if (scaleIndices.has(note.index)) cell.classList.add('in-scale');
         if (chordHighlightIndices && chordHighlightIndices.has(note.index)) cell.classList.add('chord-highlight');
-        if (chordRootNoteIndex !== null && note.index === chordRootNoteIndex) cell.classList.add('chord-root');
         fretboardEl.appendChild(cell);
       }
     }
@@ -228,6 +226,12 @@
     fretboardEl.querySelectorAll('.hover-match').forEach(function (el) {
       el.classList.remove('hover-match');
     });
+    fretboardEl.querySelectorAll('.hover-chord').forEach(function (el) {
+      el.classList.remove('hover-chord');
+    });
+    fretboardEl.querySelectorAll('.hover-chord-root').forEach(function (el) {
+      el.classList.remove('hover-chord-root');
+    });
   }
 
   function highlightNoteIndex(noteIndex) {
@@ -235,6 +239,22 @@
     fretboardEl.querySelectorAll('.cell.in-scale[data-note-index="' + noteIndex + '"]').forEach(function (el) {
       el.classList.add('hover-match');
     });
+  }
+
+  function highlightChordHover(chordNoteIndices, rootNoteIndex) {
+    clearHoverMatch();
+    if (chordNoteIndices) {
+      chordNoteIndices.forEach(function (noteIndex) {
+        fretboardEl.querySelectorAll('.cell.in-scale[data-note-index="' + noteIndex + '"]').forEach(function (el) {
+          el.classList.add('hover-chord');
+        });
+      });
+    }
+    if (rootNoteIndex !== undefined && rootNoteIndex !== null) {
+      fretboardEl.querySelectorAll('.cell.in-scale[data-note-index="' + rootNoteIndex + '"]').forEach(function (el) {
+        el.classList.add('hover-chord-root');
+      });
+    }
   }
 
   // Переключение 6/7 струн
@@ -257,7 +277,6 @@
     progressionStepIndex = null;
     renderProgressionDegrees();
     renderProgressionSequence();
-    renderRiffAnchors();
     renderFretboard();
     saveState();
   });
@@ -266,7 +285,6 @@
     progressionStepIndex = null;
     renderProgressionDegrees();
     renderProgressionSequence();
-    renderRiffAnchors();
     renderFretboard();
     saveState();
   });
@@ -288,7 +306,6 @@
       btn.addEventListener('click', function () {
         progressionSequence.push(index);
         renderProgressionSequence();
-        renderRiffAnchors();
         renderFretboard();
       });
       progressionDegreesEl.appendChild(btn);
@@ -297,19 +314,26 @@
 
   function renderProgressionSequence() {
     if (!progressionSequenceEl) return;
-    const scaleName = scaleTypeSelect.value;
-    const degreeLabels = DEGREE_LABELS[scaleName] || DEGREE_LABELS['Major'];
     progressionSequenceEl.innerHTML = '';
     progressionSequence.forEach(function (degreeIndex, index) {
-      const label = degreeLabels[degreeIndex] != null ? degreeLabels[degreeIndex] : '?';
       const noteName = getNoteNameForDegree(degreeIndex);
-      const itemText = noteName ? label + ' · ' + noteName : label;
+      const itemText = noteName || '?';
+      const chordNoteIndices = getChordNoteIndices(degreeIndex);
+      const chordRootNoteIndex = getChordRootNoteIndex(degreeIndex);
       const li = document.createElement('li');
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'progression-sequence-item' + (progressionStepIndex === index ? ' selected' : '');
       btn.textContent = itemText;
       btn.setAttribute('aria-label', 'Аккорд ' + itemText + ', выбрать для подсветки на грифе');
+      btn.addEventListener('mouseenter', function () {
+        highlightChordHover(chordNoteIndices, chordRootNoteIndex);
+      });
+      btn.addEventListener('mouseleave', clearHoverMatch);
+      btn.addEventListener('focus', function () {
+        highlightChordHover(chordNoteIndices, chordRootNoteIndex);
+      });
+      btn.addEventListener('blur', clearHoverMatch);
       btn.addEventListener('click', function () {
         progressionStepIndex = progressionStepIndex === index ? null : index;
         renderProgressionSequence();
@@ -327,66 +351,10 @@
     });
   }
 
-  function getRiffAnchorGroups() {
-    return progressionSequence.map(function (degreeIndex, index) {
-      const noteIndex = getChordRootNoteIndex(degreeIndex);
-      return {
-        noteIndex: noteIndex,
-        noteName: noteIndex !== undefined ? NOTES[noteIndex] : '',
-        step: index + 1
-      };
-    }).filter(function (anchor) {
-      return anchor.noteIndex !== undefined;
-    });
-  }
-
-  function renderRiffAnchors() {
-    if (!riffAnchorsEl) return;
-    riffAnchorsEl.innerHTML = '';
-
-    const groups = getRiffAnchorGroups();
-    if (groups.length === 0) {
-      const emptyItem = document.createElement('li');
-      emptyItem.className = 'riff-anchor-empty';
-      emptyItem.textContent = 'добавь аккорды в цепочку';
-      riffAnchorsEl.appendChild(emptyItem);
-      return;
-    }
-
-    groups.forEach(function (anchor) {
-      const li = document.createElement('li');
-      const btn = document.createElement('button');
-      const noteSpan = document.createElement('span');
-      const stepsSpan = document.createElement('span');
-      const stepText = String(anchor.step);
-      btn.type = 'button';
-      btn.className = 'riff-anchor';
-      btn.setAttribute('data-note-index', anchor.noteIndex);
-      btn.setAttribute('aria-label', 'Опора ' + anchor.noteName + ', шаг ' + stepText);
-      noteSpan.className = 'riff-anchor-note';
-      noteSpan.textContent = anchor.noteName;
-      stepsSpan.className = 'riff-anchor-steps';
-      stepsSpan.textContent = stepText;
-      btn.appendChild(noteSpan);
-      btn.appendChild(stepsSpan);
-      btn.addEventListener('mouseenter', function () {
-        highlightNoteIndex(anchor.noteIndex);
-      });
-      btn.addEventListener('mouseleave', clearHoverMatch);
-      btn.addEventListener('focus', function () {
-        highlightNoteIndex(anchor.noteIndex);
-      });
-      btn.addEventListener('blur', clearHoverMatch);
-      li.appendChild(btn);
-      riffAnchorsEl.appendChild(li);
-    });
-  }
-
   function clearProgression() {
     progressionSequence = [];
     progressionStepIndex = null;
     renderProgressionSequence();
-    renderRiffAnchors();
     renderFretboard();
   }
 
@@ -465,7 +433,7 @@
 
   // Hover: подсветка одинаковых нот в тональности
   fretboardEl.addEventListener('mouseover', function (e) {
-    var cell = e.target;
+    var cell = e.target && e.target.closest ? e.target.closest('.cell') : null;
     if (!cell.classList || !cell.classList.contains('cell') || cell.classList.contains('fret-label')) return;
     if (!cell.classList.contains('in-scale')) return;
     var noteIndex = cell.getAttribute('data-note-index');
@@ -484,5 +452,4 @@
   renderFretboard();
   renderProgressionDegrees();
   renderProgressionSequence();
-  renderRiffAnchors();
 })();
